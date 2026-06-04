@@ -1,0 +1,119 @@
+import java.util.*;
+
+public class Main {
+
+    static int[] tree;
+    static int[] lazy;
+    static int n = 16;
+
+    static void build(int node, int start, int end, int[] arr) {
+        if (start == end) {
+            tree[node] = arr[start];
+            return;
+        }
+
+        int mid = (start + end) / 2;
+
+        build(2 * node, start, mid, arr);
+        build(2 * node + 1, mid + 1, end, arr);
+
+        tree[node] = Math.max(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    static void update(int node, int start, int end,
+                       int l, int r, int val) {
+
+        if (lazy[node] != 0) {
+            tree[node] += lazy[node];
+
+            if (start != end) {
+                lazy[2 * node] += lazy[node];
+                lazy[2 * node + 1] += lazy[node];
+            }
+
+            lazy[node] = 0;
+        }
+
+        if (start > r || end < l)
+            return;
+
+        if (start >= l && end <= r) {
+            tree[node] += val;
+
+            if (start != end) {
+                lazy[2 * node] += val;
+                lazy[2 * node + 1] += val;
+            }
+
+            return;
+        }
+
+        int mid = (start + end) / 2;
+
+        update(2 * node, start, mid, l, r, val);
+        update(2 * node + 1, mid + 1, end, l, r, val);
+
+        tree[node] = Math.max(tree[2 * node], tree[2 * node + 1]);
+    }
+
+    static int query(int node, int start, int end,
+                     int l, int r) {
+
+        if (lazy[node] != 0) {
+            tree[node] += lazy[node];
+
+            if (start != end) {
+                lazy[2 * node] += lazy[node];
+                lazy[2 * node + 1] += lazy[node];
+            }
+
+            lazy[node] = 0;
+        }
+
+        if (start > r || end < l)
+            return Integer.MIN_VALUE;
+
+        if (start >= l && end <= r)
+            return tree[node];
+
+        int mid = (start + end) / 2;
+
+        int left = query(2 * node, start, mid, l, r);
+        int right = query(2 * node + 1, mid + 1, end, l, r);
+
+        return Math.max(left, right);
+    }
+
+    public static void main(String[] args) {
+
+        int[] corridors = new int[n];
+
+        Arrays.fill(corridors, 2);
+
+        tree = new int[4 * n];
+        lazy = new int[4 * n];
+
+        build(1, 0, n - 1, corridors);
+
+        // update [4,11] += 2
+        update(1, 0, n - 1, 4, 11, 2);
+
+        // update [9,15] += 1
+        update(1, 0, n - 1, 9, 15, 1);
+
+        // query max [0,15]
+        System.out.println(
+            "query max [0,15] = "
+            + query(1, 0, n - 1, 0, 15)
+        );
+
+        // update [1,6] += 3
+        update(1, 0, n - 1, 1, 6, 3);
+
+        // query max [5,13]
+        System.out.println(
+            "query max [5,13] = "
+            + query(1, 0, n - 1, 5, 13)
+        );
+    }
+}

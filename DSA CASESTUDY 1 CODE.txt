@@ -1,0 +1,97 @@
+public class RankAVL {
+
+    static class Node {
+        int key;
+        int height;
+        int size;
+        Node left, right;
+
+        Node(int key) {
+            this.key = key;
+            this.height = 1;
+            this.size = 1;
+        }
+    }
+
+    static int getHeight(Node n) {
+        return (n == null) ? 0 : n.height;
+    }
+
+    static int getSize(Node n) {
+        return (n == null) ? 0 : n.size;
+    }
+
+    static void update(Node n) {
+        if (n != null) {
+            n.height = 1 + Math.max(getHeight(n.left), getHeight(n.right));
+            n.size = 1 + getSize(n.left) + getSize(n.right);
+        }
+    }
+
+    static Node insert(Node root, int key) {
+        if (root == null)
+            return new Node(key);
+
+        // Higher scores go to the left
+        if (key > root.key)
+            root.left = insert(root.left, key);
+        else if (key < root.key)
+            root.right = insert(root.right, key);
+
+        update(root);
+        return root;
+    }
+
+    static int rankOf(Node root, int key) {
+        int rank = 1;
+
+        while (root != null) {
+
+            if (key > root.key) {
+                root = root.left;
+
+            } else if (key < root.key) {
+                rank += getSize(root.left) + 1;
+                root = root.right;
+
+            } else {
+                rank += getSize(root.left);
+                return rank;
+            }
+        }
+
+        return -1;
+    }
+
+    static void printDescending(Node root) {
+        if (root == null)
+            return;
+
+        printDescending(root.left);
+        System.out.print(root.key + " ");
+        printDescending(root.right);
+    }
+
+    public static void main(String[] args) {
+
+        Node root = null;
+
+        int[] scores = {50, 70, 30, 80, 60, 40, 20};
+
+        for (int score : scores) {
+            root = insert(root, score);
+        }
+
+        System.out.println("Scores in descending order:");
+        printDescending(root);
+        System.out.println();
+
+        System.out.println("Rank of 80 = " + rankOf(root, 80));
+        System.out.println("Rank of 70 = " + rankOf(root, 70));
+        System.out.println("Rank of 60 = " + rankOf(root, 60));
+        System.out.println("Rank of 50 = " + rankOf(root, 50));
+        System.out.println("Rank of 40 = " + rankOf(root, 40));
+        System.out.println("Rank of 30 = " + rankOf(root, 30));
+        System.out.println("Rank of 20 = " + rankOf(root, 20));
+    }
+}

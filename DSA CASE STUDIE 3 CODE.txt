@@ -1,0 +1,100 @@
+import java.util.*;
+
+public class Main {
+
+    static final int WHITE = 0;
+    static final int GREY = 1;
+    static final int BLACK = 2;
+
+    static List<Integer>[] graph;
+    static int[] color;
+    static int[] parent;
+
+    static List<Integer> cycle = new ArrayList<>();
+
+    static boolean dfs(int u) {
+
+        color[u] = GREY;
+
+        for (int v : graph[u]) {
+
+            if (color[v] == WHITE) {
+
+                parent[v] = u;
+
+                if (dfs(v))
+                    return true;
+            }
+
+            else if (color[v] == GREY) {
+
+                // Cycle found
+                cycle.add(v);
+
+                int cur = u;
+
+                while (cur != v) {
+                    cycle.add(cur);
+                    cur = parent[cur];
+                }
+
+                cycle.add(v);
+
+                Collections.reverse(cycle);
+
+                return true;
+            }
+        }
+
+        color[u] = BLACK;
+        return false;
+    }
+
+    public static void main(String[] args) {
+
+        int V = 10;
+
+        graph = new ArrayList[V];
+
+        for (int i = 0; i < V; i++)
+            graph[i] = new ArrayList<>();
+
+        // login=0, profile=1, billing=2
+        graph[0].add(1);
+        graph[1].add(2);
+        graph[2].add(0);
+
+        color = new int[V];
+        parent = new int[V];
+
+        Arrays.fill(parent, -1);
+
+        boolean found = false;
+
+        for (int i = 0; i < V; i++) {
+
+            if (color[i] == WHITE) {
+
+                if (dfs(i)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+
+        if (found) {
+
+            System.out.println("Cycle Detected");
+
+            System.out.print("Cycle: ");
+
+            for (int node : cycle)
+                System.out.print(node + " ");
+
+            System.out.println();
+        }
+        else {
+            System.out.println("No Cycle");
+        }
+    }
+}
